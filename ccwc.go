@@ -15,46 +15,56 @@ func main() {
 	flag.Parse()
 
 	paths := flag.Args()
-	for _, path := range paths {
-		res := count(path)
-		ans := "\t"
-		allFlag := false
-		if !*lineFlag && !*byteFlag && !*wordFlag {
-			allFlag = true
+
+	if len(paths) == 0 {
+		scanner := bufio.NewScanner(os.Stdin)
+		res := countUtil(scanner)
+		displayResult(lineFlag, byteFlag, wordFlag, res)
+	} else {
+		for _, path := range paths {
+			res := count(path)
+			displayResult(lineFlag, byteFlag, wordFlag, res)
 		}
-		if *lineFlag || allFlag {
-			ans += fmt.Sprintf("%d\t", res[0])
-		}
-		if *byteFlag || allFlag {
-			ans += fmt.Sprintf("%d\t", res[1])
-		}
-		if *wordFlag || allFlag {
-			ans += fmt.Sprintf("%d\t", res[2])
-		}
-		fmt.Println(ans, path)
 	}
 }
 
-func count(path string) []int {
-	lineCount := 0
-	wordCount := 0
-	byteCount := 0
+func displayResult(lineFlag *bool, byteFlag *bool, wordFlag *bool, res []int) {
+	ans := "\t"
+	allFlag := false
+	if !*lineFlag && !*byteFlag && !*wordFlag {
+		allFlag = true
+	}
+	if *lineFlag || allFlag {
+		ans += fmt.Sprintf("%d\t", res[0])
+	}
+	if *byteFlag || allFlag {
+		ans += fmt.Sprintf("%d\t", res[1])
+	}
+	if *wordFlag || allFlag {
+		ans += fmt.Sprintf("%d\t", res[2])
+	}
+	fmt.Println(ans, "stdin")
+}
 
+func count(path string) []int {
 	file, err := os.Open(path)
 	check(err)
 	defer file.Close()
 	scanner := bufio.NewScanner(file)
+	return countUtil(scanner)
+}
 
+func countUtil(scanner *bufio.Scanner) []int {
+	lineCount := 0
+	wordCount := 0
+	byteCount := 0
 	for scanner.Scan() {
 		line := scanner.Text()
 		words := strings.Fields(line)
 		lineCount++
 		wordCount += len(words)
+		byteCount += len(line)
 	}
-	stat, err := file.Stat()
-	check(err)
-	byteCount = int(stat.Size())
-
 	return []int{lineCount, wordCount, byteCount}
 }
 
