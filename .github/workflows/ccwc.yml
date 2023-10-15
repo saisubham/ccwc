@@ -25,4 +25,4 @@ jobs:
       run: go build -v ./ccwc.go
 
     - name: Test
-      run: go test -v ./ccwc_test.go
+      run: go test -v *.go
